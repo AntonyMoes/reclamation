@@ -21,21 +21,24 @@ namespace Map {
                     .ToList())
                 .ToList();
 
-            // todo: check dimensions
-            // todo: rotate map
+            if (tiles.Count == 0)
+                throw new ApplicationException("Empty shape");
 
-            return new TileShape(tiles);
+            if (tiles.FirstOrDefault(row => row.Count != tiles[0].Count) is { } unevenRow)
+                throw new ApplicationException($"Uneven column count: {tiles[0].Count} in topmost row," +
+                                               $"but {unevenRow.Count} in the row number {tiles.IndexOf(unevenRow)}");
+
+            return new TileShape(tiles).Rotate(1);
         }
 
         public string ToCsv(char sep = ',') {
-            return string.Join("\n", Tiles
+            var shapeToExport = Rotate(-1);
+            return string.Join("\n", shapeToExport.Tiles
                     .Select(row => 
                         string.Join(sep.ToString(), row
                         .Select(tile => tile.ToText())
                         .ToList()))
                     .ToList());
-            
-            // todo: rotate map back
         }
 
         public bool CanNestShape(TileShape other, Vector2Int coords) {
@@ -47,7 +50,33 @@ namespace Map {
         }
 
         public TileShape Rotate(int quatersClockwise) {
-            throw new NotImplementedException();
+            var rotations = quatersClockwise.Mod(4);
+
+            var oldRows = Tiles.Count;
+            var oldCols = Tiles[0].Count;
+            var rows = rotations % 2 == 0 ? oldRows : oldCols;
+            var cols = rotations % 2 == 0 ? oldCols : oldRows;
+            List<Tile> RowInstantiator(int _) => new Tile[cols].ToList();
+            var newTiles = Enumerable.Range(0, rows).Select(RowInstantiator).ToList();
+
+            (int, int) IndexSelector(int i, int j) {
+                return rotations switch {
+                    0 => (i, j),
+                    1 => (j, cols - i - 1),
+                    2 => (rows - i - 1, cols - j - 1),
+                    3 => (rows - j - 1, i),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+
+            for (var i = 0; i < oldRows; i++) {
+                for (var j = 0; j < oldCols; j++) {
+                    var (iNew, jNew) = IndexSelector(i, j);
+                    newTiles[iNew][jNew] = Tiles[i][j];
+                }
+            }
+
+            return new TileShape(newTiles);
         }
     }
 }

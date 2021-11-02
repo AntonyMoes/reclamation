@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0e2192aefa46ef48ab272bba9d4637d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testShapeText: {fileID: 4900000, guid: 6794b65670cb425ca5331b5352aa9eb8, type: 3}
+  testShapeText: {fileID: 4900000, guid: 7655bb9f7b702504abd8968012e61e63, type: 3}
 --- !u!4 &294311680
 Transform:
   m_ObjectHideFlags: 0
