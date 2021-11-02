@@ -153,6 +153,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testShapeText: {fileID: 4900000, guid: 7655bb9f7b702504abd8968012e61e63, type: 3}
+  testNestedParentText: {fileID: 4900000, guid: 84e4407bbb1312c458fbc89040cf905b, type: 3}
+  testNestedChildText: {fileID: 4900000, guid: f54c0c691b60e67409a2abe86fc0f809, type: 3}
 --- !u!4 &294311680
 Transform:
   m_ObjectHideFlags: 0
