@@ -5,9 +5,11 @@ using UnityEngine;
 
 namespace Map {
     public class TileShape {
-        public List<List<Tile>> Tiles { get; }
+        private List<List<Tile>> Tiles { get; }
+        public Vector2Int Size => new Vector2Int(Tiles.Count, Tiles[0].Count);
+        public Tile this[Vector2Int idx] => Tiles[idx.x][idx.y];
 
-        public TileShape(List<List<Tile>> tiles) {
+        private TileShape(List<List<Tile>> tiles) {
             Tiles = tiles;
         }
 

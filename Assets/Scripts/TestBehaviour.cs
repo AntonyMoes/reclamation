@@ -9,14 +9,16 @@ public class TestBehaviour : MonoBehaviour {
         Debug.Log($"Seed: {rng.Seed}, float: {rng.NextFloat(0, 100)}");
 
         var testShape = TileShape.FromCsv(testShapeText.text);
+        Debug.Log(testShape.Size);
+
         Debug.Log(testShape.ToCsv());
         Debug.Log(testShape.Rotate(1).ToCsv());
         Debug.Log(testShape.Rotate(2).ToCsv());
         Debug.Log(testShape.Rotate(3).ToCsv());
         Debug.Log(testShape.Rotate(4).ToCsv());
 
-        Debug.Log(testShape.Tiles[0][0]);
-        Debug.Log(testShape.Tiles[0][2]);
-        Debug.Log(testShape.Tiles[2][1]);
+        Debug.Log(testShape[new Vector2Int(0, 0)]);
+        Debug.Log(testShape[new Vector2Int(0, 2)]);
+        Debug.Log(testShape[new Vector2Int(2, 1)]);
     }
 }
