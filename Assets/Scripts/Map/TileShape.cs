@@ -11,7 +11,6 @@ namespace Map {
             get => _tiles[idx.x][idx.y];
             private set => _tiles[idx.x][idx.y] = value;
         }
-
         public List<(TileShape shape, Vector2Int pivot)> NestedShapes { get; }
 
         private TileShape(List<List<Tile>> tiles, List<(TileShape, Vector2Int)> nestedShapes = null) {
@@ -19,8 +18,10 @@ namespace Map {
             NestedShapes = nestedShapes ?? new List<(TileShape, Vector2Int)>();
         }
 
+        #region Parsing
+
         public static TileShape FromCsv(string csv, char sep = ',') {
-            var tiles = csv
+            var tiles = csv.Trim()
                 .Replace("\r", "")
                 .Split('\n')
                 .Select(row => row
@@ -43,14 +44,19 @@ namespace Map {
             var shapeToExport = Rotate(-1);
             var tilesToExport = withNested ? shapeToExport.MergeWithNested()._tiles : shapeToExport._tiles;
             return string.Join("\n", tilesToExport
-                    .Select(row => 
-                        string.Join(sep.ToString(), row
+                .Select(row => 
+                    string.Join(sep.ToString(), row
                         .Select(tile => tile.ToText())
                         .ToList()))
-                    .ToList());
+                .ToList());
         }
 
+        #endregion
+
+        #region Nesting
+
         public TileShape MergeWithNested() {
+            // todo: merge recursively from the deepest level of nesting
             var tilesCopy = Copy();  // le kek
 
             foreach (var (shape, pivot) in NestedShapes) {
@@ -90,12 +96,17 @@ namespace Map {
         }
 
         public bool TryNestShape(TileShape other, Vector2Int coords) {
+            // todo: add to the deepest level of nesting
             if (!CanNestShape(other, coords))
                 return false;
 
             NestedShapes.Add((other.Copy(), coords));
             return true;
         }
+
+        #endregion
+
+        #region Utils
 
         public TileShape Copy() {
             return Rotate(0);  // le kek
@@ -148,5 +159,7 @@ namespace Map {
 
             return new TileShape(newTiles, newNested);
         }
+
+        #endregion
     }
 }
