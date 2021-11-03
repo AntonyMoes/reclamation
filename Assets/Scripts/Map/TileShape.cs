@@ -20,13 +20,13 @@ namespace Map {
 
         #region Parsing
 
-        public static TileShape FromCsv(string csv, char sep = ',') {
+        public static TileShape FromCsv(string csv, TileDictionary metaDictionary, char sep = ',') {
             var tiles = csv.Trim()
                 .Replace("\r", "")
                 .Split('\n')
                 .Select(row => row
                     .Split(sep)
-                    .Select(str => str.ToTile())
+                    .Select(str => str.ToTile(metaDictionary))
                     .ToList())
                 .ToList();
 
@@ -83,12 +83,12 @@ namespace Map {
                 return false;
 
             foreach (var otherIdx in other.Size.Iterate()) {
-                if (other[otherIdx] == Tile.None)
+                if (other[otherIdx] == null)
                     continue;
 
                 var idx = coords + otherIdx;
                 var tile = nestedShape[idx];
-                if (tile == Tile.None || tile != Tile.Empty)
+                if (!(tile is {PlaceableOn: true}))
                     return false;
             }
 

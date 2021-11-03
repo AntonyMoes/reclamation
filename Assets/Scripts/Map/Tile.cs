@@ -1,26 +1,42 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Map {
-    public enum Tile {
-        None,
-        Empty,
-        Occupied
+    public class Tile {
+        public string Symbol { get; }
+        public bool PlaceableOn { get; }
+        public MetaData MetaData { get; }
+
+        public Tile(string symbol, TileData tileData) {
+            tileData ??= new TileData();
+            Symbol = symbol;
+            PlaceableOn = tileData.placeableOn;
+            MetaData = tileData.metaData;
+        }
     }
 
     public static class TileMethods {
-        private static readonly (string text, Tile tile)[] Mapping = {
-            (" ", Tile.None),
-            ("", Tile.None),  // additional mapping for parsing purposes
-            ("o", Tile.Empty),
-            ("x", Tile.Occupied),
+        private static readonly List<(string text, Tile tile)> Mapping = new List<(string text, Tile tile)> {
+            (" ", null),
+            ("", null),  // additional mapping for parsing purposes
         };
         
         public static string ToText(this Tile tile) {
-            return Mapping.First(m => m.tile == tile).text;
+            var mappingIndex = Mapping.FindIndex(p => p.tile == tile);
+            if (mappingIndex != -1)
+                return Mapping[mappingIndex].text;
+
+            return tile.Symbol;
         }
 
-        public static Tile ToTile(this string textTile) {
-            return Mapping.First(m => m.text == textTile).tile;
+        
+        public static Tile ToTile(this string textTile, TileDictionary tileDictionary) {
+            var mappingIndex = Mapping.FindIndex(p => p.text == textTile);
+            if (mappingIndex != -1)
+                return Mapping[mappingIndex].tile;
+            
+            tileDictionary.TryGetValue(textTile, out var tileData);
+            return new Tile(textTile, tileData);
         }
     }
 }

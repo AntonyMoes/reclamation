@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "tile": "x",
+      "tileData": {
+        "placeableOn": false
+      }
+    },
+    {
+      "tile": "o",
+      "tileData": {
+        "placeableOn": true
+      }
+    }
+  ]
+}
