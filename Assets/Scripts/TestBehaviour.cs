@@ -1,4 +1,5 @@
 using Map;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -7,6 +8,7 @@ public class TestBehaviour : MonoBehaviour {
     [SerializeField] private TextAsset testNestedParentText;
     [SerializeField] private TextAsset testNestedChildText;
     [SerializeField] private TextAsset tileDictionaryText;
+    [SerializeField] private TextMeshProUGUI display;
     
     private void Start() {
         var rng = new Random.Random(UnityEngine.Random.Range(0, int.MaxValue));
