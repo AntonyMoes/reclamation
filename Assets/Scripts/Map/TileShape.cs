@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace Map {
-    public class TileShape {  // todo: metadata
+    public class TileShape {
         private readonly List<List<Tile>> _tiles;
         public Vector2Int Size => new Vector2Int(_tiles.Count, _tiles[0].Count);
         public Tile this[Vector2Int idx] {
@@ -56,14 +56,14 @@ namespace Map {
         #region Nesting
 
         public TileShape MergeWithNested() {
-            // todo: merge recursively from the deepest level of nesting
             var tilesCopy = Copy();  // le kek
 
             foreach (var (shape, pivot) in NestedShapes) {
-                var shapeSize = shape.Size;
+                var mergedShape = shape.MergeWithNested();
+                var shapeSize = mergedShape.Size;
                 foreach (var idx in shapeSize.Iterate()) {
                     try {
-                        tilesCopy[idx + pivot] = shape[idx];
+                        tilesCopy[idx + pivot] = mergedShape[idx];
                     }
                     catch (Exception e) {
                         Debug.Log($"Idx: {idx}, pivot: {pivot}, shapeSize: {shapeSize}, size: {Size}");
@@ -75,33 +75,56 @@ namespace Map {
             return new TileShape(tilesCopy._tiles);
         }
 
-        public bool CanNestShape(TileShape other, Vector2Int coords) {
-            var nestedShape = MergeWithNested();
-
-            var maxDimensions = coords + other.Size;
-            if (maxDimensions.x > Size.x || maxDimensions.y > Size.y)
+        public bool CanNestShape(TileShape other, Vector2Int coords, out TileShape parent, bool recursively = true) {
+            if (!IsInShape(coords, other.Size)) {
+                parent = null;
                 return false;
+            }
 
+            if (recursively) {
+                foreach (var (shape, pivot) in NestedShapes) {
+                    var canNest = shape.CanNestShape(other, coords - pivot, out var nestedParent);
+                    if (canNest) {
+                        parent = nestedParent;
+                        return true;
+                    }
+                }
+            }
+
+            var nestedShape = MergeWithNested();
             foreach (var otherIdx in other.Size.Iterate()) {
-                if (other[otherIdx] == null)
+                var otherTile = other[otherIdx];
+                if (otherTile == null)
                     continue;
 
                 var idx = coords + otherIdx;
                 var tile = nestedShape[idx];
-                if (!(tile is {PlaceableOn: true}))
-                    return false;
+                if (tile != null && tile.CanPlaceOther(otherTile)) {
+                    continue;
+                }
+
+                parent = null;
+                return false;
             }
 
+            parent = this;
             return true;
         }
 
-        public bool TryNestShape(TileShape other, Vector2Int coords) {
-            // todo: add to the deepest level of nesting
-            if (!CanNestShape(other, coords))
+        public bool CanNestShape(TileShape other, Vector2Int coords, bool recursively = true) {
+            return CanNestShape(other, coords, out _, recursively);
+        }
+
+        public bool TryNestShape(TileShape other, Vector2Int coords, out TileShape parent, bool recursively = true) {
+            if (!CanNestShape(other, coords, out parent, recursively))
                 return false;
 
-            NestedShapes.Add((other.Copy(), coords));
+            parent.NestedShapes.Add((other.Copy(), coords));
             return true;
+        }
+        
+        public bool TryNestShape(TileShape other, Vector2Int coords, bool recursively = true) {
+            return TryNestShape(other, coords, out _, recursively);
         }
 
         #endregion
@@ -158,6 +181,14 @@ namespace Map {
             }).ToList();
 
             return new TileShape(newTiles, newNested);
+        }
+
+        private bool IsInShape(Vector2Int localCoords) {
+            return !(localCoords.x < 0 || localCoords.x >= Size.x || localCoords.y < 0 || localCoords.y >= Size.y);
+        }
+
+        private bool IsInShape(Vector2Int localCoords, Vector2Int shapeSize) {
+            return IsInShape(localCoords) && IsInShape(localCoords + shapeSize - Vector2Int.one);
         }
 
         #endregion

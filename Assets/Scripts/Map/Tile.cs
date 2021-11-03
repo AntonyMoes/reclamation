@@ -3,15 +3,22 @@ using System.Linq;
 
 namespace Map {
     public class Tile {
-        public string Symbol { get; }
-        public bool PlaceableOn { get; }
-        public MetaData MetaData { get; }
+        public readonly string Symbol;
+        public readonly MetaData MetaData;
+
+        private readonly bool _placeableOn;
+        private readonly List<string> _placingOverrides;
 
         public Tile(string symbol, TileData tileData) {
             tileData ??= new TileData();
             Symbol = symbol;
-            PlaceableOn = tileData.placeableOn;
+            _placeableOn = tileData.placeableOn;
+            _placingOverrides = tileData.placingOverrides;
             MetaData = tileData.metaData;
+        }
+
+        public bool CanPlaceOther(Tile other) {
+            return _placeableOn ^ _placingOverrides.Contains(other.Symbol);
         }
     }
 
