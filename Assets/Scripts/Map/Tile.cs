@@ -27,7 +27,7 @@ namespace Map {
             (" ", null),
             ("", null),  // additional mapping for parsing purposes
         };
-        
+
         public static string ToText(this Tile tile) {
             var mappingIndex = Mapping.FindIndex(p => p.tile == tile);
             if (mappingIndex != -1)
@@ -36,14 +36,13 @@ namespace Map {
             return tile.Symbol;
         }
 
-        
         public static Tile ToTile(this string textTile, TileDictionary tileDictionary) {
             var mappingIndex = Mapping.FindIndex(p => p.text == textTile);
             if (mappingIndex != -1)
                 return Mapping[mappingIndex].tile;
             
             tileDictionary.TryGetValue(textTile, out var tileData);
-            return new Tile(textTile, tileData);
+            return new Tile(textTile, tileData ?? new TileData());
         }
     }
 }

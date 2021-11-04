@@ -1,5 +1,6 @@
+using Generation;
 using Map;
-using TMPro;
+using Random;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,15 +9,19 @@ public class TestBehaviour : MonoBehaviour {
     [SerializeField] private TextAsset testNestedParentText;
     [SerializeField] private TextAsset testNestedChildText;
     [SerializeField] private TextAsset tileDictionaryText;
-    [SerializeField] private TextMeshProUGUI display;
     
+    [SerializeField] private TextAsset endText;
+    [SerializeField] private TextAsset turnText;
+
     private void Start() {
-        var rng = new Random.Random(UnityEngine.Random.Range(0, int.MaxValue));
+        var rng = new Rng(Rng.RandomSeed);
         Debug.Log($"Seed: {rng.Seed}, float: {rng.NextFloat(0, 100)}");
         var tempDict = new TileDictionary {{"a", new TileData {metaData = null, placeableOn = false}}};
         Debug.Log(tempDict.ToJson());
 
         var tileDictionary = TileDictionary.FromJson(tileDictionaryText.text);
+        Debug.Log(tileDictionary.ToJson());
+        Debug.Log(string.Join(", ", tileDictionary["+"].metaData.tags));
 
         var testShape = TileShape.FromCsv(testShapeText.text, tileDictionary);
 
@@ -45,5 +50,18 @@ public class TestBehaviour : MonoBehaviour {
         Debug.Log(testNestedParent.Rotate(4).ToCsv());
 
         // todo: proper tests maybe?
+
+        var turn = ConnectableShape.FromTileShape(TileShape.FromCsv(turnText.text, tileDictionary));
+        var end = ConnectableShape.FromTileShape(TileShape.FromCsv(endText.text, tileDictionary));
+        
+        Assert.IsFalse(end.TryConnect(end, Direction.West, out _));
+        Assert.IsTrue(end.TryConnect(end.Rotate(2) as ConnectableShape, Direction.West, out var offset));
+        Debug.Log($"Offset: {offset}");
+        Assert.IsTrue((end.Rotate(1) as ConnectableShape).TryConnect(end.Rotate(3) as ConnectableShape, Direction.North, out offset));
+        Debug.Log($"Offset: {offset}");
+        Assert.IsTrue((end.Rotate(2) as ConnectableShape).TryConnect(end.Rotate(4) as ConnectableShape, Direction.East, out offset));
+        Debug.Log($"Offset: {offset}");
+        Assert.IsTrue((end.Rotate(3) as ConnectableShape).TryConnect(end.Rotate(5) as ConnectableShape, Direction.South, out offset));
+        Debug.Log($"Offset: {offset}");
     }
 }

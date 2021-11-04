@@ -13,20 +13,22 @@ namespace Map {
         }
         public List<(TileShape shape, Vector2Int pivot)> NestedShapes { get; }
 
-        private TileShape(List<List<Tile>> tiles, List<(TileShape, Vector2Int)> nestedShapes = null) {
+        protected TileShape(List<List<Tile>> tiles, List<(TileShape, Vector2Int)> nestedShapes = null) {
             _tiles = tiles;
             NestedShapes = nestedShapes ?? new List<(TileShape, Vector2Int)>();
         }
 
+        protected TileShape(TileShape other) : this(other.Copy()._tiles, other.Copy().NestedShapes) { }
+
         #region Parsing
 
-        public static TileShape FromCsv(string csv, TileDictionary metaDictionary, char sep = ',') {
+        public static TileShape FromCsv(string csv, TileDictionary tileDictionary, char sep = ',') {
             var tiles = csv.Trim()
                 .Replace("\r", "")
                 .Split('\n')
                 .Select(row => row
                     .Split(sep)
-                    .Select(str => str.ToTile(metaDictionary))
+                    .Select(str => str.ToTile(tileDictionary))
                     .ToList())
                 .ToList();
 
@@ -62,13 +64,7 @@ namespace Map {
                 var mergedShape = shape.MergeWithNested();
                 var shapeSize = mergedShape.Size;
                 foreach (var idx in shapeSize.Iterate()) {
-                    try {
-                        tilesCopy[idx + pivot] = mergedShape[idx];
-                    }
-                    catch (Exception e) {
-                        Debug.Log($"Idx: {idx}, pivot: {pivot}, shapeSize: {shapeSize}, size: {Size}");
-                        throw;
-                    }
+                    tilesCopy[idx + pivot] = mergedShape[idx] ?? tilesCopy[idx + pivot];
                 }
             }
 
@@ -135,7 +131,7 @@ namespace Map {
             return Rotate(0);  // le kek
         }
 
-        public TileShape Rotate(int quatersClockwise) {
+        public virtual TileShape Rotate(int quatersClockwise) {
             var rotations = quatersClockwise.Mod(4);
 
             var oldRows = _tiles.Count;

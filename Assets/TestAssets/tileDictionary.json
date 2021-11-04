@@ -7,10 +7,23 @@
       }
     },
     {
-      "tile": "o",
+      "tile": "o"
+    },
+    {
+      "tile": "-"
+    },
+    {
+      "tile": "+",
       "tileData": {
-        "placeableOn": true
+        "metaData": {
+          "tags": [
+            "connector"
+          ]
+        }
       }
+    },
+    {
+      "tile": "."
     }
   ]
 }

@@ -6,6 +6,6 @@ namespace Map {
     public class TileData {
         public bool placeableOn = true;
         public List<string> placingOverrides = new List<string>();
-        public MetaData metaData;
+        public MetaData metaData = new MetaData();
     }
 }

@@ -2,15 +2,17 @@
 using System.Linq;
 
 namespace Random {
-    public class Random
+    public class Rng
     {
         private readonly System.Random _rnd;
         public int Seed { get; }
         
-        public Random(int seed) {
+        public Rng(int seed) {
             Seed = seed;
             _rnd = new System.Random(seed);
         }
+
+        public static int RandomSeed => UnityEngine.Random.Range(0, int.MaxValue);
 
         public int NextInt(int min, int max) {
             return _rnd.Next(min, max);
