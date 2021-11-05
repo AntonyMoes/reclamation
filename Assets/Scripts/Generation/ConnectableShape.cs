@@ -13,25 +13,31 @@ namespace Generation {
         }
 
         public static ConnectableShape FromTileShape(TileShape target) {
-            if (target.Size.x < 2 || target.Size.y < 2) {
-                return null;
-            }
-            
+            // if (target.Size.x < 2 || target.Size.y < 2) {
+            //     return null;
+            // }
+
             var connectors = new List<Connector>();
             foreach (var direction in DirectionMethods.Clockwise()) {
                 var rotation = Direction.North.RotationTo(direction);
                 var rotatedTarget = target.Rotate(rotation);
 
                 var multipleConnectors = false;
+                var mismatchingConnectorTypes = false;
                 var connectorStart = -1;
                 var connectorEnd = -1;  // last + 1
+                string type = null;
                 for (var i = 0; i < rotatedTarget.Size.x; i++) {
                     var tile = rotatedTarget[new Vector2Int(i, rotatedTarget.Size.y - 1)];
                     if (tile != null && tile.MetaData.tags.Contains(Tags.Connector)) {
                         if (connectorStart == -1) {
                             connectorStart = i;
+                            type = tile.MetaData.tags.FirstOrDefault(t => t.StartsWith(Tags.ConnectorType));
                         } else if (connectorEnd != -1) {
                             multipleConnectors = true;
+                            break;
+                        } else if (tile.MetaData.tags.FirstOrDefault(t => t.StartsWith(Tags.ConnectorType)) != type) {
+                            mismatchingConnectorTypes = true;
                             break;
                         }
                     } else if (connectorStart != -1 && connectorEnd == -1) {
@@ -39,14 +45,14 @@ namespace Generation {
                     }
                 }
 
-                if (multipleConnectors)
+                if (multipleConnectors || mismatchingConnectorTypes)
                     continue;
 
                 if (connectorStart != -1) {
                     if (connectorEnd == -1)
                         connectorEnd = rotatedTarget.Size.x;
 
-                    connectors.Add(new Connector(direction, connectorEnd - connectorStart, connectorStart));
+                    connectors.Add(new Connector(direction, connectorEnd - connectorStart, connectorStart, type));
                 }
             }
 
@@ -60,7 +66,8 @@ namespace Generation {
             var rotatedBase = base.Rotate(quatersClockwise);
             var rotatedConnectors = Connectors
                 .Select(pair => (pair.Key.Rotate(-quatersClockwise),
-                    new Connector(pair.Value.Direction.Rotate(-quatersClockwise), pair.Value.Size, pair.Value.Offset)))
+                    new Connector(pair.Value.Direction.Rotate(-quatersClockwise),
+                        pair.Value.Size, pair.Value.Offset, pair.Value.Type)))
                 .ToDictionary(pair => pair.Item1, pair => pair.Item2);
             return new ConnectableShape(rotatedBase, rotatedConnectors);
         }
@@ -68,7 +75,7 @@ namespace Generation {
         public bool TryConnect(ConnectableShape other, Direction direction, out Vector2Int otherOffset) {
             if (Connectors.TryGetValue(direction, out var connector) &&
                 other.Connectors.TryGetValue(direction.Opposite(), out var otherConnector)) {
-                if (connector.Size != otherConnector.Size) {
+                if (connector.Size != otherConnector.Size || connector.Type != otherConnector.Type) {
                     otherOffset = Vector2Int.zero;
                     return false;
                 }
@@ -78,6 +85,22 @@ namespace Generation {
             }
 
             otherOffset = Vector2Int.zero;
+            return false;
+        }
+        
+        public bool TryConnectRotating(ConnectableShape other, Direction direction, out Vector2Int otherOffset, out ConnectableShape otherRotated, out int rotation) {
+            foreach (var otherDirection in DirectionMethods.Clockwise()) {
+                rotation = Direction.North.RotationTo(otherDirection);
+                otherRotated = (ConnectableShape) other.Rotate(rotation);
+
+                if (TryConnect(otherRotated, direction, out otherOffset)) {
+                    return true;
+                }
+            }
+
+            otherRotated = null;
+            otherOffset = Vector2Int.zero;
+            rotation = 0;
             return false;
         }
 
@@ -102,24 +125,20 @@ namespace Generation {
         }
 
         private static Vector2Int ShapeOffset(Direction direction) {
-            return direction switch {
-                Direction.North => Vector2Int.up,
-                Direction.West => Vector2Int.left,
-                Direction.South => Vector2Int.down,
-                Direction.East => Vector2Int.right,
-                _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
-            };
+            return direction.ToVector();
         }
 
         public class Connector {
             public readonly Direction Direction;
             public readonly int Size;
             public readonly int Offset;
+            public readonly string Type;
 
-            public Connector(Direction direction, int size, int offset) {
+            public Connector(Direction direction, int size, int offset, string type) {
                 Direction = direction;
                 Size = size;
                 Offset = offset;
+                Type = type;
             }
         }
     }

@@ -21,7 +21,7 @@ public class TestBehaviour : MonoBehaviour {
 
         var tileDictionary = TileDictionary.FromJson(tileDictionaryText.text);
         Debug.Log(tileDictionary.ToJson());
-        Debug.Log(string.Join(", ", tileDictionary["+"].metaData.tags));
+        Debug.Log(string.Join(", ", tileDictionary["-"].metaData.tags));
 
         var testShape = TileShape.FromCsv(testShapeText.text, tileDictionary);
 

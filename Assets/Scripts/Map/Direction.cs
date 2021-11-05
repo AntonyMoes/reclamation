@@ -1,4 +1,7 @@
-﻿namespace Map {
+﻿using System;
+using UnityEngine;
+
+namespace Map {
     public enum Direction {
         North = 0,
         West = 1,
@@ -22,6 +25,16 @@
         // if we rotate something clockwise from North, the side facing North now is West e.t.c.
         public static Direction[] Clockwise() {
             return new[] {Direction.North, Direction.West, Direction.South, Direction.East};
+        }
+
+        public static Vector2Int ToVector(this Direction direction) {
+            return direction switch {
+                Direction.North => Vector2Int.up,
+                Direction.West => Vector2Int.left,
+                Direction.South => Vector2Int.down,
+                Direction.East => Vector2Int.right,
+                _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+            };
         }
     }
 }

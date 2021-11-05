@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Generation;
 using Map;
 using Random;
@@ -7,35 +8,66 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TestGenerationBehaviour : MonoBehaviour {
-    [SerializeField] private TextAsset dictionaryText;
-    [SerializeField] private TextAsset mapText;
-    [SerializeField] private TextAsset[] poolText;
     [SerializeField] private TextMeshProUGUI seedDisplay;
     [SerializeField] private Button generate;
     [SerializeField] private TextMeshProUGUI displayPrefab;
     [SerializeField] private RectTransform displayRoot;
 
+    [Header("Base")]
+    [SerializeField] private TextAsset dictionaryText;
+    [SerializeField] private TextAsset mapText;
+
+    [Header("Simple")]
+    [SerializeField] private bool generateBase;
+    [SerializeField] private TextAsset[] poolText;
+
+    [Header("Advanced")]
+    [SerializeField] private bool generateAdvanced;
+    [SerializeField] private WeightedItem<TextAsset>[] roadPoolText;
+    [SerializeField] private WeightedItem<TextAsset>[] riverPoolText;
+    [SerializeField] private TextAsset bridgeEdgeText;
+    [SerializeField] private TextAsset bridgeSegmentText;
+
     private void Generate() {
         ClearDisplays();
-        
-        var tileDictionary = TileDictionary.FromJson(dictionaryText.text);
-        var map = TileShape.FromCsv(mapText.text, tileDictionary);
-        var pool = poolText
-            .Select(t => ConnectableShape.FromTileShape(TileShape.FromCsv(t.text, tileDictionary)))
-            .ToList();
 
+        // check 107807186 for strange gen near river, maybe riverCheck is fucked
+        // 219842578 - yep it is
+        // 516341611
         var seed = Rng.RandomSeed;
         seedDisplay.text = $"Seed: {seed}";
 
+        var tileDictionary = TileDictionary.FromJson(dictionaryText.text);
+        var map = mapText.ToTileShape(tileDictionary);
+        
+        if (generateBase) {
+            var pool = poolText
+                .Select(t => t.ToConnectableShape(tileDictionary))
+                .ToList();
 
-        var mapCopy = map.Copy();
-        var rng = new Rng(seed);
-        ConnectedGenerator.GenerateDumb(rng, map, pool);
-        CreateDisplay().text = map.ToCsv();
-        var holder = HolderShape.FromShapes(map.NestedShapes, out var holderOffset);
-        CreateDisplay().text = holder.ToCsv();
-        mapCopy.TryNestShape(holder, holderOffset);
-        CreateDisplay().text = mapCopy.ToCsv();
+            var mapForRoad = map.Copy();
+            ConnectedGenerator.GenerateDumb(new Rng(seed), mapForRoad, pool.Select(s => (s, 1f)).ToList());
+            var holder = HolderShape.FromShapes(mapForRoad.NestedShapes, out _);
+            CreateDisplay().text = holder.ToCsv();
+            CreateDisplay().text = mapForRoad.ToCsv();
+        }
+
+        if (generateAdvanced) {
+            var mapForAdvanced = map.Copy();
+            var roadPool = roadPoolText
+                .Select(item => (item.item.ToConnectableShape(tileDictionary), item.weight))
+                .ToList();
+            var riverPool = riverPoolText
+                .Select(item => (item.item.ToConnectableShape(tileDictionary), item.weight))
+                .ToList();
+            var bridgeEdge = bridgeEdgeText.ToConnectableShape(tileDictionary);
+            var bridgeSegment = bridgeSegmentText.ToConnectableShape(tileDictionary);
+            var riverSymbol = tileDictionary.FirstOrDefault(p => p.Value.metaData.tags.Contains(Tags.River)).Key;
+
+            ConnectedGenerator.GenerateDumbRoadAndRiver(new Rng(seed), mapForAdvanced, roadPool, riverPool, bridgeEdge,
+                bridgeSegment, riverSymbol);
+            CreateDisplay().text = mapForAdvanced.ToCsv();
+        }
     }
 
     private void Start() {
@@ -50,5 +82,11 @@ public class TestGenerationBehaviour : MonoBehaviour {
 
     private TextMeshProUGUI CreateDisplay() {
         return Instantiate(displayPrefab, displayRoot);
+    }
+
+    [Serializable]
+    public struct WeightedItem<T> {
+        public T item;
+        public float weight;
     }
 }

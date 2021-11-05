@@ -250,7 +250,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 294311678}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0e2192aefa46ef48ab272bba9d4637d, type: 3}
   m_Name: 
@@ -287,21 +287,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 539ff0c7027c447d8825d0e7e2e562bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  seedDisplay: {fileID: 1893259759}
+  generate: {fileID: 1049830499}
+  displayPrefab: {fileID: 6448842996237062538, guid: 64611c5b3b88bae49a323ad882111e1a, type: 3}
+  displayRoot: {fileID: 1815782127}
   dictionaryText: {fileID: 4900000, guid: d5ade329555a2984aa5a8ace5c9cf37b, type: 3}
   mapText: {fileID: 4900000, guid: a394660cb927e944297cfa81f1d2ea64, type: 3}
+  generateBase: 0
   poolText:
   - {fileID: 4900000, guid: 26263b33404b89640a2afa4de3474ea3, type: 3}
   - {fileID: 4900000, guid: b4cb089fd5f2cb44e90fb56f481148b9, type: 3}
   - {fileID: 4900000, guid: b4cb089fd5f2cb44e90fb56f481148b9, type: 3}
   - {fileID: 4900000, guid: dc3a603ace1a7c14292046ebb1bfa49d, type: 3}
-  - {fileID: 4900000, guid: dc3a603ace1a7c14292046ebb1bfa49d, type: 3}
-  - {fileID: 4900000, guid: 8374a3baf60ba1d4b840642052fffd84, type: 3}
+  - {fileID: 4900000, guid: d3b9306ee391012409e4734572df4dc7, type: 3}
+  - {fileID: 4900000, guid: 4e8cffef60519a14e9de1318bd90302f, type: 3}
   - {fileID: 4900000, guid: 7d2ce2557c26a8a4f9374b7fba54c55b, type: 3}
   - {fileID: 4900000, guid: 7d2ce2557c26a8a4f9374b7fba54c55b, type: 3}
-  seedDisplay: {fileID: 1893259759}
-  generate: {fileID: 1049830499}
-  displayPrefab: {fileID: 6448842996237062538, guid: 64611c5b3b88bae49a323ad882111e1a, type: 3}
-  displayRoot: {fileID: 1815782127}
+  generateAdvanced: 1
+  roadPoolText:
+  - item: {fileID: 4900000, guid: b4cb089fd5f2cb44e90fb56f481148b9, type: 3}
+    weight: 2
+  - item: {fileID: 4900000, guid: dc3a603ace1a7c14292046ebb1bfa49d, type: 3}
+    weight: 2
+  - item: {fileID: 4900000, guid: d3b9306ee391012409e4734572df4dc7, type: 3}
+    weight: 2
+  - item: {fileID: 4900000, guid: 40efac37e5355234b959a38d12ea0436, type: 3}
+    weight: 1.5
+  - item: {fileID: 4900000, guid: 424be429c55143f4bbe963d7bd6ab068, type: 3}
+    weight: 1.5
+  - item: {fileID: 4900000, guid: 7d2ce2557c26a8a4f9374b7fba54c55b, type: 3}
+    weight: 4
+  - item: {fileID: 4900000, guid: 26263b33404b89640a2afa4de3474ea3, type: 3}
+    weight: 2
+  - item: {fileID: 4900000, guid: 4e8cffef60519a14e9de1318bd90302f, type: 3}
+    weight: 2
+  riverPoolText:
+  - item: {fileID: 4900000, guid: 6c259156a6c532b478b008e47bc17295, type: 3}
+    weight: 0.5
+  - item: {fileID: 4900000, guid: ed1f1fb82f2ab5f47abfdfb6f6c84142, type: 3}
+    weight: 2
+  - item: {fileID: 4900000, guid: 89da0c67de627dc41b3f4569ff995581, type: 3}
+    weight: 1
+  - item: {fileID: 4900000, guid: c7e8532b9b61e274bade63c2c496973f, type: 3}
+    weight: 1
+  bridgeEdgeText: {fileID: 4900000, guid: 72e1047a54c0ed044b8f56739b0528a4, type: 3}
+  bridgeSegmentText: {fileID: 4900000, guid: d3fde48f3a5993d48925cd029a3bd98f, type: 3}
 --- !u!1 &483163214
 GameObject:
   m_ObjectHideFlags: 0

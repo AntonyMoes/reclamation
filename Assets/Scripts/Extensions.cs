@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Generation;
+using Map;
 using UnityEngine;
 
 public static class Extensions {
@@ -14,4 +16,14 @@ public static class Extensions {
             }
         }
     }
+
+    public static TileShape ToTileShape(this TextAsset asset, TileDictionary dictionary) {
+        return TileShape.FromCsv(asset.text, dictionary);
+    }
+
+    public static ConnectableShape ToConnectableShape(this TextAsset asset, TileDictionary dictionary) {
+        return ConnectableShape.FromTileShape(TileShape.FromCsv(asset.text, dictionary));
+    }
+    
+    
 }

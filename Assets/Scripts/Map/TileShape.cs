@@ -189,7 +189,7 @@ namespace Map {
             return Enumerable.Range(0, size.x).Select(RowInstantiator).ToList();
         }
 
-        private bool IsInShape(Vector2Int localCoords) {
+        public bool IsInShape(Vector2Int localCoords) {
             return !(localCoords.x < 0 || localCoords.x >= Size.x || localCoords.y < 0 || localCoords.y >= Size.y);
         }
 

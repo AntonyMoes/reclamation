@@ -7,23 +7,87 @@
       }
     },
     {
-      "tile": "o"
-    },
-    {
-      "tile": "-"
-    },
-    {
-      "tile": "+",
+      "tile": "o",
       "tileData": {
+        "placeableOn": true
+      }
+    },
+    {
+      "tile": "-",
+      "tileData": {
+        "placeableOn": false,
+        "placingOverrides":[
+          "="
+        ],
         "metaData": {
           "tags": [
-            "connector"
+            "connector",
+            "connectorType_road"
           ]
         }
       }
     },
     {
-      "tile": "."
+      "tile": "+",
+      "tileData": {
+        "placeableOn": false,
+        "placingOverrides":[
+          "="
+        ],
+        "metaData": {
+          "tags": [
+            "connector",
+            "connectorType_road",
+            "This is a 'stop' tile"
+          ]
+        }
+      }
+    },
+    {
+      "tile": "=",
+      "tileData": {
+        "placeableOn": false,
+        "metaData": {
+          "tags": [
+            "connector",
+            "connectorType_bridge"
+          ]
+        }
+      }
+    },
+    {
+      "tile": ".",
+      "tileData": {
+        "placeableOn": true
+      }
+    },
+    {
+      "tile": "w",
+      "tileData": {
+        "placeableOn": false
+      }
+    },
+    {
+      "tile": "d",
+      "tileData": {
+        "placeableOn": false
+      }
+    },
+    {
+      "tile": "r",
+      "tileData": {
+        "placeableOn": false,
+        "placingOverrides":[
+          "="
+        ],
+        "metaData": {
+          "tags": [
+            "connector",
+            "connectorType_river",
+            "river"
+          ]
+        }
+      }
     }
   ]
 }
