@@ -22,6 +22,17 @@ namespace Map {
 
         #region Parsing
 
+        protected static TileShape FromTiles(List<List<Tile>> tiles) {
+            if (tiles == null || tiles.Count == 0)
+                throw new ApplicationException("Empty shape");
+
+            if (tiles.FirstOrDefault(row => row.Count != tiles[0].Count) is { } unevenRow)
+                throw new ApplicationException($"Uneven column count: {tiles[0].Count} in the 0 row," +
+                                               $"but {unevenRow.Count} in the row number {tiles.IndexOf(unevenRow)}");
+
+            return new TileShape(tiles);
+        }
+
         public static TileShape FromCsv(string csv, TileDictionary tileDictionary, char sep = ',') {
             var tiles = csv.Trim()
                 .Replace("\r", "")
@@ -32,14 +43,7 @@ namespace Map {
                     .ToList())
                 .ToList();
 
-            if (tiles.Count == 0)
-                throw new ApplicationException("Empty shape");
-
-            if (tiles.FirstOrDefault(row => row.Count != tiles[0].Count) is { } unevenRow)
-                throw new ApplicationException($"Uneven column count: {tiles[0].Count} in topmost row," +
-                                               $"but {unevenRow.Count} in the row number {tiles.IndexOf(unevenRow)}");
-
-            return new TileShape(tiles).Rotate(1);
+            return FromTiles(tiles).Rotate(1);
         }
 
         public string ToCsv(char sep = ',', bool withNested = true) {
@@ -140,8 +144,7 @@ namespace Map {
             var oldCols = _tiles[0].Count;
             var rows = rotations % 2 == 0 ? oldRows : oldCols;
             var cols = rotations % 2 == 0 ? oldCols : oldRows;
-            List<Tile> RowInstantiator(int _) => new Tile[cols].ToList();
-            var newTiles = Enumerable.Range(0, rows).Select(RowInstantiator).ToList();
+            var newTiles = CreateTiles(new Vector2Int(rows, cols));
 
             (int, int) IndexSelector(int i, int j) {
                 return rotations switch {
@@ -179,6 +182,11 @@ namespace Map {
             }).ToList();
 
             return new TileShape(newTiles, newNested);
+        }
+
+        protected static List<List<Tile>> CreateTiles(Vector2Int size, Lazy<Tile> filler = null) {
+            List<Tile> RowInstantiator(int _) => Enumerable.Range(0, size.y).Select(_ => filler?.Value).ToList();
+            return Enumerable.Range(0, size.x).Select(RowInstantiator).ToList();
         }
 
         private bool IsInShape(Vector2Int localCoords) {
