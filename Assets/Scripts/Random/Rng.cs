@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Random {
-    public class Rng
-    {
+    public class Rng {
         private readonly System.Random _rnd;
         public int Seed { get; }
-        
+
         public Rng(int seed) {
             Seed = seed;
             _rnd = new System.Random(seed);
