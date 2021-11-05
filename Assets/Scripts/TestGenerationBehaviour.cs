@@ -4,6 +4,7 @@ using Map;
 using Random;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TestGenerationBehaviour : MonoBehaviour {
     [SerializeField] private TextAsset dictionaryText;
@@ -11,8 +12,9 @@ public class TestGenerationBehaviour : MonoBehaviour {
     [SerializeField] private TextAsset[] poolText;
     [SerializeField] private TextMeshProUGUI display;
     [SerializeField] private TextMeshProUGUI seedDisplay;
+    [SerializeField] private Button generate;
 
-    private void Start() {
+    private void Generate() {
         var tileDictionary = TileDictionary.FromJson(dictionaryText.text);
         var map = TileShape.FromCsv(mapText.text, tileDictionary);
         var pool = poolText
@@ -25,5 +27,10 @@ public class TestGenerationBehaviour : MonoBehaviour {
         var rng = new Rng(seed);
         ConnectedGenerator.GenerateDumb(rng, map, pool);
         display.text = map.ToCsv();
+    }
+
+    private void Start() {
+        generate.onClick.AddListener(Generate);
+        generate.onClick.Invoke();
     }
 }

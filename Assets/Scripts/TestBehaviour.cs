@@ -63,5 +63,9 @@ public class TestBehaviour : MonoBehaviour {
         Debug.Log($"Offset: {offset}");
         Assert.IsTrue((end.Rotate(3) as ConnectableShape).TryConnect(end.Rotate(5) as ConnectableShape, Direction.South, out offset));
         Debug.Log($"Offset: {offset}");
+
+        var parent = TileShape.FromCsv(".,.", tileDictionary);
+        Assert.IsTrue(parent.TryNestShape(end, new Vector2Int(0, -1)));
+        Debug.Log(parent.ToCsv());
     }
 }

@@ -58,12 +58,15 @@ namespace Map {
         #region Nesting
 
         public TileShape MergeWithNested() {
-            var tilesCopy = Copy();  // le kek
+            var tilesCopy = Copy();
 
             foreach (var (shape, pivot) in NestedShapes) {
                 var mergedShape = shape.MergeWithNested();
                 var shapeSize = mergedShape.Size;
                 foreach (var idx in shapeSize.Iterate()) {
+                    if (!IsInShape(idx + pivot))  // only possible when the corresponding child tile is null
+                        continue;
+
                     tilesCopy[idx + pivot] = mergedShape[idx] ?? tilesCopy[idx + pivot];
                 }
             }
@@ -71,12 +74,7 @@ namespace Map {
             return new TileShape(tilesCopy._tiles);
         }
 
-        public bool CanNestShape(TileShape other, Vector2Int coords, out TileShape parent, bool recursively = true) {
-            if (!IsInShape(coords, other.Size)) {
-                parent = null;
-                return false;
-            }
-
+        public virtual bool CanNestShape(TileShape other, Vector2Int coords, out TileShape parent, bool recursively = true) {
             if (recursively) {
                 foreach (var (shape, pivot) in NestedShapes) {
                     var canNest = shape.CanNestShape(other, coords - pivot, out var nestedParent);
@@ -94,10 +92,14 @@ namespace Map {
                     continue;
 
                 var idx = coords + otherIdx;
-                var tile = nestedShape[idx];
-                if (tile != null && tile.CanPlaceOther(otherTile)) {
-                    continue;
+                if (!IsInShape(idx)) {  // when the other's tile is not null but doesn't fit in the current shape
+                    parent = null;
+                    return false;
                 }
+
+                var tile = nestedShape[idx];
+                if (tile != null && tile.CanPlaceOther(otherTile))
+                    continue;
 
                 parent = null;
                 return false;
@@ -183,9 +185,9 @@ namespace Map {
             return !(localCoords.x < 0 || localCoords.x >= Size.x || localCoords.y < 0 || localCoords.y >= Size.y);
         }
 
-        private bool IsInShape(Vector2Int localCoords, Vector2Int shapeSize) {
-            return IsInShape(localCoords) && IsInShape(localCoords + shapeSize - Vector2Int.one);
-        }
+        // protected bool IsInShape(Vector2Int localCoords, Vector2Int shapeSize) {
+        //     return IsInShape(localCoords) && IsInShape(localCoords + shapeSize - Vector2Int.one);  // TODO: check tiles instead of dimensions
+        // }
 
         #endregion
     }
