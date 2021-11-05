@@ -40,6 +40,25 @@ namespace Generation {
             return new HolderShape(CreateTiles(size), nestingCheck.NestedShapes);
         }
 
+        public static HolderShape FromChildren(IEnumerable<TileShape> children, TileShape parent, out Vector2Int position, bool removeFromParent = true) {
+            if (removeFromParent) {
+                var removedShapes = children.Select(child => {
+                    var removed = parent.TryRemoveNested(child, out var pivot);
+                    if (!removed)
+                        Debug.LogWarning($"Could not remove child {child.GetHashCode()} from array of children: " +
+                                         string.Join(", ", parent.NestedShapes.Select(t => t.shape.GetHashCode())));
+                    return (child, pivot);
+                }).ToList();
+
+                return FromShapes(removedShapes, out position);
+            }
+
+            var shapes = children.Select(child =>
+                    (child, parent.NestedShapes.First(t => t.shape == child).pivot))
+                .ToList();
+            return FromShapes(shapes, out position);
+        }
+
         public override bool CanNestShape(TileShape other, Vector2Int coords, out TileShape parent, bool recursively = true) {if (recursively) {
                 foreach (var (shape, pivot) in NestedShapes) {
                     var canNest = shape.CanNestShape(other, coords - pivot, out var nestedParent);

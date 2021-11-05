@@ -4,6 +4,7 @@ using System.Linq;
 using Map;
 using Random;
 using UnityEngine;
+using Utils;
 
 namespace Generation {
     public static class ConnectedGenerator {
@@ -14,7 +15,9 @@ namespace Generation {
             var rotatedStartingShape = (ConnectableShape) startingShape.Rotate(startingRotation);
             map.TryNestShape(rotatedStartingShape, startingPoint, false);
 
+            var added = new HashSet<TileShape>();
             var queue = new Queue<ShapeInfo>();
+            added.Add(rotatedStartingShape);
             foreach (var connector in rotatedStartingShape.Connectors) {
                 queue.Enqueue(new ShapeInfo(rotatedStartingShape, startingPoint, connector.Key));
             }
@@ -30,6 +33,7 @@ namespace Generation {
                         continue;
                     }
 
+                    added.Add(info.Shape);
                     foreach (var connector in info.Shape.Connectors) {
                         if (connector.Key == info.Direction)
                             continue;
@@ -40,6 +44,12 @@ namespace Generation {
                     break;
                 }
             }
+
+            if (added.Count == 0)
+                return;
+
+            var holder = HolderShape.FromChildren(added, map, out var holderPosition);
+            map.TryNestShape(holder, holderPosition);
         }
 
         public static void GenerateDumbRoadAndRiver(Rng rng, TileShape map, List<(ConnectableShape, float)> roadPool, 
@@ -58,8 +68,18 @@ namespace Generation {
                     return false;
                 }
 
+                var added = new List<TileShape>();
                 var currentInfo = info;
                 var bridgeStarted = false;
+                using var exitStack = new ExitStack();
+                exitStack.Add(() => {
+                    if (added.Count == 0)
+                        return;
+
+                    var holder = HolderShape.FromChildren(added, map, out var holderPosition);
+                    map.TryNestShape(holder, holderPosition);
+                });
+
                 while (true) {
                     if (!(TryConnectAndNest(innerRng, innerMap, currentInfo, bridgeEdge) is { } edgeInfo)) {
                         if (!bridgeStarted)
@@ -68,8 +88,10 @@ namespace Generation {
                         if (!(TryConnectAndNest(innerRng, innerMap, currentInfo, bridgeSegment) is { } segmentInfo))
                             return true;
 
+                        added.Add(segmentInfo.Shape);
                         currentInfo = NewInfoFromConnected(segmentInfo);
                     } else {
+                        added.Add(edgeInfo.Shape);
                         var newInfo = NewInfoFromConnected(edgeInfo);
                         if (!bridgeStarted) {
                             bridgeStarted = true;

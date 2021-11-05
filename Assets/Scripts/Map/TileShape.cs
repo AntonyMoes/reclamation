@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Utils;
 
 namespace Map {
     public class TileShape {
@@ -90,8 +91,9 @@ namespace Map {
             }
 
             var nestedShape = MergeWithNested();
+            var nestedOther = other.MergeWithNested();
             foreach (var otherIdx in other.Size.Iterate()) {
-                var otherTile = other[otherIdx];
+                var otherTile = nestedOther[otherIdx];
                 if (otherTile == null)
                     continue;
 
@@ -121,12 +123,33 @@ namespace Map {
             if (!CanNestShape(other, coords, out parent, recursively))
                 return false;
 
-            parent.NestedShapes.Add((other.Copy(), coords));
+            parent.NestedShapes.Add((other, coords));
             return true;
         }
-        
+
         public bool TryNestShape(TileShape other, Vector2Int coords, bool recursively = true) {
             return TryNestShape(other, coords, out _, recursively);
+        }
+
+        public bool TryRemoveNested(TileShape shape, out Vector2Int pivot, bool recursive = true) {
+            for (var i = 0; i < NestedShapes.Count; i++) {
+                var (nested, p) = NestedShapes[i];
+                if (nested == shape) {
+                    NestedShapes.RemoveAt(i);
+                    pivot = p;
+                    return true;
+                }
+
+                if (recursive && nested.TryRemoveNested(shape, out pivot))
+                    return true;
+            }
+
+            pivot = Vector2Int.zero;
+            return false;
+        }
+
+        public bool TryRemoveNested(TileShape shape, bool recursive = true) {
+            return TryRemoveNested(shape, out _, recursive);
         }
 
         #endregion

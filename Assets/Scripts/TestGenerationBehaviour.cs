@@ -6,6 +6,7 @@ using Random;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Utils;
 
 public class TestGenerationBehaviour : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI seedDisplay;
@@ -67,6 +68,9 @@ public class TestGenerationBehaviour : MonoBehaviour {
             ConnectedGenerator.GenerateDumbRoadAndRiver(new Rng(seed), mapForAdvanced, roadPool, riverPool, bridgeEdge,
                 bridgeSegment, riverSymbol);
             CreateDisplay().text = mapForAdvanced.ToCsv();
+            foreach (var (shape, _) in mapForAdvanced.NestedShapes) {
+                CreateDisplay().text = shape.ToCsv();
+            }
         }
     }
 
