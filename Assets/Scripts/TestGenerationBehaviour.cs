@@ -35,6 +35,10 @@ public class TestGenerationBehaviour : MonoBehaviour {
         // check 107807186 for strange gen near river, maybe riverCheck is fucked
         // 219842578 - yep it is
         // 516341611
+        // 795334635
+        // 1378295752
+        // 1636234718
+        // 1978910350
         var seed = Rng.RandomSeed;
         seedDisplay.text = $"Seed: {seed}";
 
